@@ -20,14 +20,22 @@ createAuthorizedFetch(
 **getTokens**: A function that returns a Promise resolving to the current tokens.<br/>
 **setTokens**: A function to update tokens.<br/>
 **refreshUrl**: An optional URL for token refresh.<br/>
-**options**: Optional fetch options.
+**options**: Additional options in json format
 
-### Returns
-A function that accepts a URL and fetch options and returns a Promise resolving to a Response object.
+#### Additional options
+
+| Option                     | Type                                             | Description                                                | Default Value                                            |
+|----------------------------|--------------------------------------------------|------------------------------------------------------------|----------------------------------------------------------|
+| `fetch`                    | `typeof fetch`                                   | The `fetch` function used for making HTTP requests.        | The global `fetch` function.                             |
+| `isSuccessfulStatusCode`  | `(statusCode: number) => boolean`                | Function to check if the HTTP status code indicates success. | Returns `true` if the status code is in the range 200-299, `false` otherwise. |
+| `isUnauthorizedStatusCode`| `(statusCode: number) => boolean`                | Function to check if the HTTP status code indicates unauthorized access. | Returns `true` if the status code is 401, `false` otherwise. |
+
+### Default Options
 
 ### Usage
 ```ts
 import { createAuthorizedFetch, Tokens } from 'authorized-fetch';
+import { customFetch } from './custom-fetch';
 
 // Define getTokens function
 const getTokens = async () => {
@@ -40,7 +48,9 @@ const setTokens = (tokens: Tokens) => {
 };
 
 // Create authorized fetch function
-const authorizedFetch = createAuthorizedFetch(getTokens, setTokens);
+const authorizedFetch = createAuthorizedFetch(getTokens, setTokens, 'https://to_your_api/refresh_url_endpoint', {
+  fetch: customFetch
+});
 
 // Usage example
 authorizedFetch('https://api.example.com/data', {
