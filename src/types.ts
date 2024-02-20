@@ -5,4 +5,6 @@ export interface Tokens {
 
 export interface CreateAuthorizedFetchOptions {
   fetch: typeof fetch;
+  isSuccessfulStatusCode: (statusCode: number) => boolean;
+  isUnauthorizedStatusCode: (statusCode: number) => boolean;
 }

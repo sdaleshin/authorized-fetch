@@ -8,7 +8,10 @@ export function createAuthorizedFetch(
   options?: Partial<CreateAuthorizedFetchOptions>,
 ) {
   let refreshPromise: Promise<Tokens>;
-  const { fetch } = { ...getDefaultOptions(), ...options };
+  const { fetch, isSuccessfulStatusCode, isUnauthorizedStatusCode } = {
+    ...getDefaultOptions(),
+    ...options,
+  };
   async function refreshToken(refreshToken: string) {
     const refreshTokenResponse = await fetch(refreshUrl!, {
       method: 'POST',
@@ -17,7 +20,7 @@ export function createAuthorizedFetch(
         'Content-Type': 'application/json',
       },
     });
-    if (refreshTokenResponse.status !== 201) {
+    if (!isSuccessfulStatusCode(refreshTokenResponse?.status)) {
       throw new Error("Can't refresh token");
     }
     return await refreshTokenResponse.json();
@@ -34,8 +37,10 @@ export function createAuthorizedFetch(
         Authorization: 'Bearer ' + tokens.token,
       },
     });
-    if (refreshUrl && response.status === 401) {
-      refreshPromise = refreshToken(tokens.refreshToken);
+    if (refreshUrl && isUnauthorizedStatusCode(response.status)) {
+      if (!refreshPromise) {
+        refreshPromise = refreshToken(tokens.refreshToken);
+      }
       tokens = await refreshPromise;
       setTokens(tokens);
       response = await fetch(url, {
