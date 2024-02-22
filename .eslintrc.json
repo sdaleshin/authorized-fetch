@@ -1,0 +1,16 @@
+{
+  "env": {
+    "browser": true
+  },
+  "root": true,
+  "extends": ["eslint:recommended","prettier", "plugin:@typescript-eslint/recommended"],
+  "plugins": [
+    "@typescript-eslint",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "ignorePatterns": ["/dist/**/*.*"],
+  "rules": {
+    "prettier/prettier": "error"
+  }
+}
