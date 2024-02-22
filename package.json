@@ -1,5 +1,5 @@
 {
-  "name": "authorized-fetch",
+  "name": "authorized-fetch-refresh",
   "version": "1.0.0",
   "description": "Fetch wrapper that adds auth token in headers and does refresh if token expired",
   "main": "dist/index.js",
@@ -20,7 +20,8 @@
   "keywords": [
     "fetch",
     "auth",
-    "authorization"
+    "authorization",
+    "refresh token"
   ],
   "author": "sdaleshin",
   "license": "ISC",

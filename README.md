@@ -1,10 +1,10 @@
-# authorized-fetch
+# authorized-fetch-refresh
 This npm package provides a method createAuthorizedFetch for creating an authorized fetch function that automatically handles token authentication and refresh.
 
 ### Install
 
 ```shell
-npm i authorized-fetch
+npm i authorized-fetch-refresh
 ```
 
 ### Method
