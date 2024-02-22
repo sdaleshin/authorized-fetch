@@ -8,28 +8,38 @@ export function createAuthorizedFetch(
   options?: Partial<CreateAuthorizedFetchOptions>,
 ) {
   let refreshPromise: Promise<Tokens>;
-  const { fetch, isSuccessfulStatusCode, isUnauthorizedStatusCode } = {
+  let refreshInProgress = false;
+  const {
+    fetch,
+    isSuccessfulStatusCode,
+    isUnauthorizedStatusCode,
+    onRefreshFailure,
+  } = {
     ...getDefaultOptions(),
     ...options,
   };
   async function refreshToken(refreshToken: string) {
-    const refreshTokenResponse = await fetch(refreshUrl!, {
-      method: 'POST',
-      body: JSON.stringify({ refreshToken }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!isSuccessfulStatusCode(refreshTokenResponse?.status)) {
-      throw new Error("Can't refresh token");
+    refreshInProgress = true;
+    try {
+      const refreshTokenResponse = await fetch(refreshUrl!, {
+        method: 'POST',
+        body: JSON.stringify({ refreshToken }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!isSuccessfulStatusCode(refreshTokenResponse?.status)) {
+        throw new Error("Can't refresh token");
+      }
+      return await refreshTokenResponse.json();
+    } finally {
+      refreshInProgress = false;
     }
-    return await refreshTokenResponse.json();
   }
   return async function (url: string, options?: RequestInit) {
-    let tokens: Tokens = await getTokens();
-    if (refreshPromise) {
-      tokens = await refreshPromise;
-    }
+    let tokens: Tokens = refreshInProgress
+      ? await refreshPromise
+      : await getTokens();
     let response = await fetch(url, {
       ...options,
       headers: {
@@ -38,10 +48,17 @@ export function createAuthorizedFetch(
       },
     });
     if (refreshUrl && isUnauthorizedStatusCode(response.status)) {
-      if (!refreshPromise) {
+      if (!refreshInProgress) {
         refreshPromise = refreshToken(tokens.refreshToken);
       }
-      tokens = await refreshPromise;
+      try {
+        tokens = await refreshPromise;
+      } catch (e) {
+        if (onRefreshFailure) {
+          onRefreshFailure();
+        }
+        throw e;
+      }
       setTokens(tokens);
       response = await fetch(url, {
         ...options,

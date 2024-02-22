@@ -24,11 +24,12 @@ createAuthorizedFetch(
 
 #### Additional options
 
-| Option                     | Type                                             | Description                                                | Default Value                                            |
-|----------------------------|--------------------------------------------------|------------------------------------------------------------|----------------------------------------------------------|
-| `fetch`                    | `typeof fetch`                                   | The `fetch` function used for making HTTP requests.        | The global `fetch` function.                             |
-| `isSuccessfulStatusCode`  | `(statusCode: number) => boolean`                | Function to check if the HTTP status code indicates success. | Returns `true` if the status code is in the range 200-299, `false` otherwise. |
-| `isUnauthorizedStatusCode`| `(statusCode: number) => boolean`                | Function to check if the HTTP status code indicates unauthorized access. | Returns `true` if the status code is 401, `false` otherwise. |
+| Option                     | Type                              | Description                                                              | Default Value                                                                 |
+|----------------------------|-----------------------------------|--------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| `fetch`                    | `typeof fetch`                    | The `fetch` function used for making HTTP requests.                      | The global `fetch` function.                                                  |
+| `isSuccessfulStatusCode`  | `(statusCode: number) => boolean` | Function to check if the HTTP status code indicates success.             | Returns `true` if the status code is in the range 200-299, `false` otherwise. |
+| `isUnauthorizedStatusCode`| `(statusCode: number) => boolean` | Function to check if the HTTP status code indicates unauthorized access. | Returns `true` if the status code is 401, `false` otherwise.                  |
+| `onRefreshFailure`| `() => void`                      | Callback for unsuccessful token refresh attempt                          | undefined                                                                     |
 
 ### Default Options
 

@@ -1,4 +1,5 @@
 import { createAuthorizedFetch } from './createAuthorizedFetch';
+import { Tokens } from './types';
 
 describe('createAuthorizedFetch', () => {
   it('should successfully execute request without token refresh', async () => {
@@ -290,10 +291,18 @@ describe('createAuthorizedFetch', () => {
 
   it('parallel requests with refresh token', async () => {
     // Prepare
-    const getTokens = jest.fn().mockResolvedValue({
-      token: 'invalidToken',
-      refreshToken: 'validRefreshToken',
-    });
+    const storage = {
+      tokens: {
+        token: 'invalidToken',
+        refreshToken: 'validRefreshToken',
+      },
+    };
+    const getTokens = async () => {
+      return storage.tokens as Tokens;
+    };
+    const setTokens = (tokens: Tokens) => {
+      storage.tokens = tokens;
+    };
     const fetchMock = jest
       .fn()
       .mockImplementation((url: string, options: RequestInit) => {
@@ -321,7 +330,7 @@ describe('createAuthorizedFetch', () => {
     // Execute
     const authorizedFetch = createAuthorizedFetch(
       getTokens,
-      jest.fn(),
+      setTokens,
       'refreshUrl',
       {
         fetch: fetchMock,
@@ -350,10 +359,18 @@ describe('createAuthorizedFetch', () => {
 
   it('sequential requests with refresh token', async () => {
     // Prepare
-    const getTokens = jest.fn().mockResolvedValue({
-      token: 'invalidToken',
-      refreshToken: 'validRefreshToken',
-    });
+    const storage = {
+      tokens: {
+        token: 'invalidToken',
+        refreshToken: 'validRefreshToken',
+      },
+    };
+    const getTokens = async () => {
+      return storage.tokens as Tokens;
+    };
+    const setTokens = (tokens: Tokens) => {
+      storage.tokens = tokens;
+    };
     const fetchMock = jest
       .fn()
       .mockImplementation((url: string, options: RequestInit) => {
@@ -381,7 +398,7 @@ describe('createAuthorizedFetch', () => {
     // Execute
     const authorizedFetch = createAuthorizedFetch(
       getTokens,
-      jest.fn(),
+      setTokens,
       'refreshUrl',
       {
         fetch: fetchMock,
@@ -402,5 +419,32 @@ describe('createAuthorizedFetch', () => {
     expect(fetchMock.mock.calls[1][0]).toBe('refreshUrl');
     expect(fetchMock.mock.calls[2][0]).toBe('http://first.first');
     expect(fetchMock.mock.calls[3][0]).toBe('http://second.second');
+  });
+  it('should throw error if refreshToken fails and call onRefreshFailure', async () => {
+    // Prepare
+    const getTokens = jest.fn().mockResolvedValue({
+      token: 'expiredToken',
+      refreshToken: 'validRefreshToken',
+    });
+    const fetchMock = jest.fn().mockResolvedValueOnce({ status: 401 });
+    const onRefreshFailure = jest.fn();
+
+    // Execute
+    const authorizedFetch = createAuthorizedFetch(
+      getTokens,
+      jest.fn(),
+      'refreshUrl',
+      {
+        fetch: fetchMock,
+        onRefreshFailure,
+      },
+    );
+    await expect(
+      authorizedFetch('https://example.com/api/data', {}),
+    ).rejects.toThrowError("Can't refresh token");
+
+    // Verify
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(onRefreshFailure).toHaveBeenCalledTimes(1);
   });
 });
