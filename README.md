@@ -35,7 +35,7 @@ createAuthorizedFetch(
 
 ### Usage
 ```ts
-import { createAuthorizedFetch, Tokens } from 'authorized-fetch';
+import { createAuthorizedFetch, Tokens } from 'authorized-fetch-refresh';
 import { customFetch } from './custom-fetch';
 
 // Define getTokens function
