@@ -1,6 +1,6 @@
 {
   "name": "authorized-fetch-refresh",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fetch wrapper that adds auth token in headers and does refresh if token expired",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
